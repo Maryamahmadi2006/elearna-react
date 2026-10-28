@@ -22,13 +22,17 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
       - run: npm run build
 
+      # enablement: true is what turns Pages on for a repository that has never
+      # had an Actions-sourced Pages site; without it this step only reads.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
