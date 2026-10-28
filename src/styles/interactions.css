@@ -1,0 +1,1026 @@
+/* ==========================================================================
+   Custom interaction styles — authored for this recreation.
+   The reference stylesheet (public/assets/elearna-webflow.css) provides the
+   visual design; these rules add the behaviour the Webflow runtime produced
+   on the live site: the shared header, hover dropdowns, the mobile drawer,
+   scroll reveals, and the slider / accordion / cart open states.
+   ========================================================================== */
+
+/* The bar is fixed, so every in-page scroll (the career [data-anchor] links,
+   focus jumps) has to land below it rather than underneath it. */
+html {
+  scroll-padding-top: calc(var(--site-header-height, 72px) + 16px);
+}
+
+/* --------------------------------------------------------------------------
+   1. Site header — one component (SiteHeader) rendered on every page.
+   The bar is fixed and starts transparent; SiteHeader interpolates its
+   background to the brand heading colour as the page scrolls.
+   -------------------------------------------------------------------------- */
+.site-header {
+  transition: box-shadow 0.3s ease;
+}
+
+.site-header.is-solid {
+  box-shadow: 0 6px 24px rgba(15, 37, 42, 0.18);
+}
+
+/* The top utility strip cannot fit on small screens. */
+@media screen and (max-width: 991px) {
+  .site-header .navbar-two-top {
+    display: none;
+  }
+}
+
+/* The base stylesheet hides .nav-two from 1280px up because the reference
+   swaps in a separate mega navbar (.desktop-menu) there. This project ships
+   one header on every page, so the bar stays visible at all widths. */
+@media screen and (min-width: 1280px) {
+  .site-header .nav-two {
+    display: block;
+  }
+}
+
+/* Logo · menu · actions. The two 1fr tracks keep the menu dead-centred in the
+   bar while the logo and the cart/search stay pinned to the edges. */
+.site-header .navbar-wrapper {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.site-header .w-nav-brand {
+  justify-self: start;
+}
+
+.site-header .navbar-right {
+  justify-self: end;
+}
+
+/* In the grid the burger would otherwise stretch across its whole 1fr track,
+   leaving the bars floating in the middle of the bar. */
+.site-header .w-nav-button {
+  justify-self: end;
+  float: none;
+}
+
+/* Plain links and dropdown triggers both carry .dropdown-toggle, so they
+   share type, spacing and colour. Triggers are real <button>s.
+   Webflow's base sheet gives nav links and dropdowns `margin: auto` and
+   `padding-right: 40px` (blank space for a caret it never renders here), which
+   is what spread the menu across the whole bar. */
+.nav-menu .dropdown-toggle {
+  position: relative;
+  background: none;
+  border: 0;
+  font-family: inherit;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 14px 13px;
+  font-size: 16px;
+  align-items: center;
+  gap: 7px;
+  display: inline-flex;
+}
+
+/* The reference marks its two submenu triggers with a caret; it draws it from
+   the Webflow icon font, this build uses an inline SVG so it inherits the link
+   colour and can turn over while the group is open. */
+.nav-menu .dropdown-caret {
+  flex: none;
+  opacity: 0.8;
+  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.nav-menu .w-dropdown.is-open > .dropdown-toggle .dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.nav-menu .w-dropdown {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Sliding brand underline on hover / focus / active. */
+.nav-menu .dropdown-toggle::after {
+  content: "";
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: 8px;
+  height: 2px;
+  background: var(--color--brand, #ffb606);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.nav-menu .dropdown-toggle:hover::after,
+.nav-menu .dropdown-toggle:focus-visible::after,
+.nav-menu .dropdown-toggle.w--current::after,
+.nav-menu .w-dropdown.is-open > .dropdown-toggle::after {
+  transform: scaleX(1);
+}
+
+.nav-menu .dropdown-toggle.w--current {
+  color: var(--color--brand, #ffb606);
+}
+
+.nav-menu .dropdown-toggle:focus-visible {
+  outline: 2px solid var(--color--brand, #ffb606);
+  outline-offset: -4px;
+}
+
+/* The drawer owns the auth links on small screens. */
+.nav-menu-auth {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   1b. Desktop dropdown panels.
+   Pointer devices open on hover; click / keyboard state is carried by the
+   .is-open / .w--open classes that SiteHeader owns.
+   -------------------------------------------------------------------------- */
+.dropdown-list {
+  min-width: 240px;
+  box-shadow: 0 18px 40px rgba(15, 37, 42, 0.14);
+  border-radius: 0 0 6px 6px;
+}
+
+.dropdown-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 560px;
+}
+
+.dropdown-columns .dropdown-link {
+  padding-right: 22px;
+  padding-left: 22px;
+  white-space: normal;
+}
+
+.dropdown-column {
+  padding: 6px 0;
+}
+
+.dropdown-columns .dropdown-group-label {
+  padding-right: 22px;
+  padding-left: 22px;
+}
+
+.dropdown-column + .dropdown-column {
+  border-left: 1px solid var(--color--light-gray, #f1f4f4);
+}
+
+.dropdown-group-label {
+  padding: 10px 40px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7b7c7d;
+}
+
+.dropdown-list .dropdown-link {
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
+    color 0.2s ease, background-color 0.2s ease;
+}
+
+.dropdown-list .dropdown-link:hover {
+  transform: translateX(6px);
+  background-color: var(--color--light-blue, #eff6f8);
+}
+
+@media (hover: hover) and (min-width: 992px) {
+  .dropdown.w-dropdown:hover > .dropdown-list,
+  .dropdown.w-dropdown:focus-within > .dropdown-list {
+    display: block;
+    animation: elearna-drop-in 0.3s ease both;
+  }
+}
+
+.dropdown-list.w--open {
+  display: block;
+  animation: elearna-drop-in 0.3s ease both;
+}
+
+@keyframes elearna-drop-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (min-width: 992px) {
+  .site-header .nav-menu.w-nav-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    float: none;
+  }
+
+  .site-header .nav-menu .w-dropdown {
+    position: relative;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Mobile drawer.
+   The base stylesheet only collapses a nav that declares data-collapse and
+   only reveals it through [data-nav-menu-open], so SiteHeader sets both.
+   Dropdown panels open inline as accordions instead of floating.
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 991px) {
+  .site-header .log-in-wrapper {
+    display: none;
+  }
+
+  .w-nav[data-collapse="medium"] .w-nav-menu[data-nav-menu-open] {
+    display: block !important;
+    position: fixed;
+    top: var(--site-header-height, 72px);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1100;
+    margin: 0;
+    padding: 8px 0 40px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--color--heading-color, #0f252a);
+    text-align: left;
+    animation: elearna-menu-in 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-list {
+    position: static;
+    display: none;
+    width: auto;
+    min-width: 0;
+    box-shadow: none;
+    border: 0;
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-list.w--open {
+    display: block;
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-columns {
+    display: block;
+    min-width: 0;
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-column + .dropdown-column {
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-toggle {
+    width: 100%;
+    justify-content: space-between;
+    color: #fff;
+    padding: 14px 22px;
+    font-size: 17px;
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-toggle::after {
+    display: none;
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-group-label {
+    padding: 12px 22px 4px;
+    color: var(--color--brand, #ffb606);
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-link {
+    padding: 11px 22px 11px 36px;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .w-nav-menu[data-nav-menu-open] .dropdown-link:hover,
+  .w-nav-menu[data-nav-menu-open] .dropdown-link.w--current {
+    color: var(--color--brand, #ffb606);
+    background: none;
+    transform: none;
+  }
+
+  .nav-menu-auth {
+    display: block;
+    margin-top: 18px;
+    padding: 18px 22px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-menu-auth a {
+    display: inline-block;
+    margin-right: 22px;
+    color: #fff;
+    font-size: 17px;
+  }
+
+  .nav-menu-auth a:hover {
+    color: var(--color--brand, #ffb606);
+  }
+}
+
+@keyframes elearna-menu-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+body.nav-locked {
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   2b. Navbar entrance + hamburger morph.
+   Reference IX2: the navbar slides down from y:-100px on load (1000ms
+   outQuart); opening the mobile menu morphs the bars into a cross.
+   -------------------------------------------------------------------------- */
+@keyframes elearna-slide-in-top {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -100px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* `backwards` rather than `both`: once the slide-in finishes the bar just uses
+   its own styles, so a browser that never starts the animation still shows it
+   instead of leaving the navbar at opacity 0. */
+.navbar-two,
+.navbar {
+  animation: elearna-slide-in-top 1s cubic-bezier(0.165, 0.84, 0.44, 1) backwards;
+}
+
+.menu-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menu-bar-one,
+.menu-bar-two {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.menu-button.w--open .bar.menu-bar-one {
+  transform: translateY(3.5px) rotate(-45deg);
+}
+
+.menu-button.w--open .bar.menu-bar-two {
+  transform: translateY(-3.5px) rotate(45deg);
+}
+
+/* --------------------------------------------------------------------------
+   3. Scroll reveal.
+   PageEnhance converts the reference's inline IX2 start states into these
+   classes, so an element the observer never reaches keeps its authored
+   styling instead of being stuck at opacity 0 forever.
+   -------------------------------------------------------------------------- */
+.reveal-hidden {
+  opacity: 0;
+  transform: translate3d(0, 40px, 0);
+}
+
+.reveal-scale-hidden,
+.reveal-grow-hidden {
+  opacity: 0;
+  transform: scale3d(0.75, 0.75, 1);
+}
+
+/* IX2 "fadeIn" preset: opacity only, no movement */
+.reveal-fade-hidden {
+  opacity: 0;
+}
+
+.reveal-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 1s cubic-bezier(0.165, 0.84, 0.44, 1) 0.1s,
+    transform 1s cubic-bezier(0.165, 0.84, 0.44, 1) 0.1s;
+}
+
+/* content the viewport scrolled straight past: show it, do not replay */
+.reveal-in.no-anim {
+  transition: none;
+}
+
+/* --------------------------------------------------------------------------
+   4. Cart drawer (right sidebar) — the reference toggled the inline
+   display:none style from JS; SiteHeader does this in React.
+   -------------------------------------------------------------------------- */
+.w-commerce-commercecartcontainerwrapper--cartType-rightSidebar[style*="block"] {
+  display: block;
+}
+
+.cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 37, 42, 0.45);
+  z-index: 1300;
+}
+
+/* --------------------------------------------------------------------------
+   5. Slider / accordion helpers used by the page behaviors (PageEnhance).
+   Slides move into a .slider-track wrapper that is translated horizontally;
+   flex keeps each slide exactly one viewport wide.
+   -------------------------------------------------------------------------- */
+.slider-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  transition: transform 0.55s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.slider-track > .w-slide {
+  vertical-align: top;
+  white-space: normal;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+}
+
+/* data-animation="cross": the slides stack inside the mask and fade over
+   data-duration ms instead of travelling along a track. They share one grid
+   cell, so the mask is as tall as the tallest slide and nothing clips when
+   webfonts or images finish loading. */
+.slider-cross .w-slider-mask {
+  width: 100%;
+  height: auto;
+  display: grid;
+}
+
+.slider-cross .w-slider-mask > .w-slide {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--slider-fade-ms, 500ms) ease;
+}
+
+.slider-cross .w-slider-mask > .w-slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.accordion-content {
+  display: none;
+}
+
+.accordion-content.is-open {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   6. FAQ accordions — PageEnhance toggles w--open and animates the height.
+   -------------------------------------------------------------------------- */
+.w-dropdown-list.w--open {
+  display: block !important;
+}
+
+.faq.w--open .faq-answer,
+.faq-two-list.w--open {
+  display: block;
+}
+
+.faq-toggle .faq-two-icon {
+  transition: transform 0.3s ease;
+}
+
+/* The "+" icon is two bars; PageEnhance rotates .plus-bar.plus-two between
+   90deg (closed, reads "+") and 0deg (open, reads "-"). */
+.faq-two-icon {
+  position: relative;
+}
+
+.plus-bar.plus-two {
+  transition: transform 0.3s ease;
+}
+
+.faq-answer,
+.faq-two-list {
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   7. Course-card hover popups — the reference faded .course-overlay in and
+   revealed .course-card-pop-up while the pointer was over the card.
+   The published sheet anchors that panel at right:-44% (left:-44% for the
+   .course-popup-last / .course-card-pop-up-two variants). With 300-330 px
+   cards and a 350 px panel that overhang buries the neighbouring card, and
+   because the variants are hard-coded per index they stop matching the actual
+   column as soon as the grid reflows — at 1100 px card #3 hung 146 px outside
+   the container. Pin the panel to its own card instead.
+   -------------------------------------------------------------------------- */
+.course-overlay {
+  transition: opacity 0.35s ease;
+}
+
+.course-cards-two:hover .course-overlay,
+.course-card:hover .course-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.course-cards-two .course-card-pop-up {
+  inset: 0;
+  display: none;
+  flex-flow: column;
+  width: auto;
+  max-width: none;
+  padding: 24px 24px 22px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.course-cards-two:hover .course-card-pop-up,
+.course-card:hover .course-card-pop-up,
+.course-cards-two.is-popped .course-card-pop-up {
+  display: flex;
+  animation: elearna-pop-in 0.35s ease;
+}
+
+/* The panel is exactly as tall as its card, so the copy is clamped instead of
+   allowed to push the button out of view. */
+.course-cards-two .course-card-pop-up .course-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 10px;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.course-cards-two .course-card-popup-tags {
+  flex: none;
+  margin-bottom: 14px;
+}
+
+.course-cards-two .course-card-pop-up > .course-card-two-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.course-cards-two .course-checkes {
+  flex: none;
+  margin-bottom: 16px;
+}
+
+.course-cards-two .course-card-pop-up .course-card-checklist {
+  grid-column-gap: 8px;
+  grid-row-gap: 6px;
+}
+
+.course-cards-two .course-cards-two-button {
+  flex: none;
+  margin-top: auto;
+}
+
+.course-cards-two .course-two-button {
+  width: 100%;
+}
+
+@keyframes elearna-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Demo-submission toast (forms without a w-form-done block).
+   -------------------------------------------------------------------------- */
+.elearna-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 16px);
+  background: var(--color--heading-color, #0f252a);
+  color: #fff;
+  padding: 14px 26px;
+  border-radius: 6px;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.25);
+  font-size: 15px;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 2000;
+}
+
+.elearna-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* --------------------------------------------------------------------------
+   9. Pricing Monthly/Yearly toggle. PageEnhance toggles .pricing-yearly on
+   the section and the ball slides across.
+   -------------------------------------------------------------------------- */
+.toggle-box .toggle-ball {
+  transition: transform 0.3s ease;
+}
+
+.pricing-yearly .toggle-ball {
+  transform: translateX(31px);
+}
+
+.monthly-amount,
+.yearly-amount {
+  transition: opacity 0.3s ease;
+}
+
+.pricing-yearly .monthly-amount {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pricing-yearly .yearly-amount {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --------------------------------------------------------------------------
+   10. Client-logo / event / team marquees. The reference scrolled duplicated
+   strips with IX2; a linear CSS loop over the identical copies is seamless.
+   -------------------------------------------------------------------------- */
+.clients-train,
+.marquee-train,
+.team-details-marquee-train {
+  animation: elearna-marquee 30s linear infinite;
+}
+
+@keyframes elearna-marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11. Home-three "Explore our top programs" — reference IX2 hover in/out:
+   the .course-four-card elements rest at 40% opacity and brighten while
+   shifting 28px left on hover. Touch devices keep them fully visible.
+   -------------------------------------------------------------------------- */
+.course-list-box .course-four-card {
+  opacity: 0.4;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.course-list-box .course-four-card:hover {
+  opacity: 1;
+  transform: translate3d(-28px, 0, 0);
+}
+
+@media (hover: none) {
+  .course-list-box .course-four-card {
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11b. About-two "Get instant access courses" cards. The reference published
+   the label panel and the arrow at opacity 0 and faded them in with an IX2
+   hover while tilting the photo aside — reproduced here in CSS. Touch devices
+   get the arrow permanently so the card still reads as tappable, and focus
+   reveals it for the keyboard.
+   -------------------------------------------------------------------------- */
+.category-four-cards .category-four-cards-background,
+.category-four-cards .arrow,
+.category-four-cards .category-cards-image-wrap {
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@media (hover: hover) {
+  .category-four-cards:hover .category-cards-image-wrap,
+  .category-four-cards:focus-within .category-cards-image-wrap {
+    transform: perspective(1000px) translate3d(-26px, 14px, 0) rotate(4deg);
+  }
+
+  .category-four-cards:hover .category-four-cards-background,
+  .category-four-cards:hover .arrow,
+  .category-four-cards:focus-within .category-four-cards-background,
+  .category-four-cards:focus-within .arrow {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .category-four-cards .arrow {
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   12. Hover + transition polish.
+   -------------------------------------------------------------------------- */
+.button {
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease,
+    color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.button:hover {
+  transform: scale(0.95);
+}
+
+.contact-three-form-pop-up {
+  transition: transform 0.3s ease;
+}
+
+@media (hover: hover) and (min-width: 992px) {
+  .events-card-two .marquee-text-box,
+  .events-card-two .events-date-wrapper {
+    transition: transform 0.3s ease;
+  }
+
+  .events-card-two .marquee-text-box {
+    transform: translate3d(0, 100%, 0);
+  }
+
+  .events-card-two .events-date-wrapper {
+    transform: translate3d(100%, 0, 0);
+  }
+
+  .events-card-two:hover .marquee-text-box,
+  .events-card-two:hover .events-date-wrapper {
+    transform: translate3d(0, 0, 0);
+    transition-duration: 0.5s;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   12b. Phantom overflow guard. The team-detail skill figures set
+   writing-mode: vertical-rl with an 80px heading size, and Chrome counts their
+   rotated line box as 17px of scrollable overflow inside the row, which reaches
+   the document as a few useless px of horizontal scroll on tablet widths. No
+   ink crosses the section edge, so clipping the section's x-axis is invisible.
+   -------------------------------------------------------------------------- */
+@supports (overflow-x: clip) {
+  .team-member-about {
+    overflow-x: clip;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   14. Card hover depth.
+   The published sheet only animated a handful of card families, so most cards
+   sat flat. One shared response everywhere: the card rises, picks up a shadow
+   and its picture pushes in behind the existing `overflow: hidden`.
+   `translate`/`scale` are used rather than `transform` so the scroll-reveal
+   layer's inline transforms are never fought over. Guarded by (hover: hover)
+   so a tap on touch never leaves a card stuck raised.
+   -------------------------------------------------------------------------- */
+@media (hover: hover) {
+  :is(
+      .course-wrap-main,
+      .course-cards-two,
+      .home-two-blog-cards,
+      .blog-three-cards-one,
+      .team-card,
+      .category-cards,
+      .course-one-category-cards,
+      .career-cards-options,
+      .pricing-one-card
+    ) {
+    transition: translate 0.45s cubic-bezier(0.165, 0.84, 0.44, 1),
+      box-shadow 0.45s ease;
+  }
+
+  :is(
+      .course-wrap-main:hover,
+      .course-cards-two:hover,
+      .home-two-blog-cards:hover,
+      .blog-three-cards-one:hover,
+      .team-card:hover,
+      .category-cards:hover,
+      .course-one-category-cards:hover,
+      .career-cards-options:hover,
+      .pricing-one-card:hover
+    ) {
+    translate: 0 -8px;
+    box-shadow: 0 26px 48px rgba(15, 37, 42, 0.17);
+  }
+
+  :is(
+      .course-wrap-main,
+      .course-cards-two,
+      .home-two-blog-cards,
+      .blog-three-cards-one,
+      .team-card,
+      .events-card-two
+    ) img {
+    transition: scale 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  :is(
+      .course-wrap-main:hover,
+      .course-cards-two:hover,
+      .home-two-blog-cards:hover,
+      .blog-three-cards-one:hover,
+      .events-card-two:hover
+    ) img {
+    scale: 1.06;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   15. Card grids on tablets and small laptops.
+   The published grids only change column count at 991 px / 767 px / 479 px, so
+   the four-across course and team cards are squeezed to 214-241 px on a 1024
+   laptop, the blog cards jump from three across straight to one full-width
+   column, and the two-across career cards leave only 150 px of text at 520 px.
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) and (max-width: 1279px) {
+  .tranding-courses-cards,
+  .team-wrapper {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 600px) and (max-width: 991px) {
+  .blog-three-cards-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* the published team grid keeps three across until 767 px, i.e. 221 px cards */
+@media (min-width: 768px) and (max-width: 991px) {
+  .team-wrapper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 599px) {
+  .tranding-courses-cards,
+  .team-wrapper,
+  .career-cards-wrapper {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* the six category tiles stay two-across on a phone; 30 px of inner padding
+   then leaves them only 128 px, so give the labels the room back */
+@media (max-width: 479px) {
+  .course-one-category-main {
+    grid-column-gap: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .course-one-category-main .category-icons-wrap {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 10px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   16. Breathing room. The published course grid keeps every card at exactly
+   30 px of gap and the navbar's Register | divider | Log in group sits 10-15
+   px from the cart, which reads cramped once the cards themselves have hover
+   depth.
+   -------------------------------------------------------------------------- */
+.home-three-courses .tranding-courses-cards {
+  grid-column-gap: 34px;
+  grid-row-gap: 38px;
+}
+
+.home-three-courses .heading-three-gap {
+  margin-bottom: 42px;
+}
+
+.site-header .navbar-right {
+  grid-column-gap: 26px;
+}
+
+.site-header .log-in-wrapper {
+  grid-column-gap: 16px;
+}
+
+.site-header .menu-border {
+  height: 18px;
+  opacity: 0.4;
+}
+
+/* --------------------------------------------------------------------------
+   13. Reduced motion — keep the visuals, drop the movement.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .navbar-two,
+  .navbar,
+  .clients-train,
+  .marquee-train,
+  .team-details-marquee-train,
+  .course-cards-two:hover .course-card-pop-up,
+  .course-card:hover .course-card-pop-up {
+    animation: none;
+  }
+
+  .reveal-hidden,
+  .reveal-scale-hidden,
+  .reveal-grow-hidden,
+  .reveal-fade-hidden {
+    opacity: 1;
+    transform: none;
+  }
+
+  .menu-bar-one,
+  .menu-bar-two,
+  .nav-menu .dropdown-caret,
+  .button,
+  .reveal-in,
+  .slider-track,
+  .slider-cross .w-slider-mask > .w-slide,
+  .contact-three-form-pop-up,
+  .events-card-two .marquee-text-box,
+  .events-card-two .events-date-wrapper {
+    transition: none;
+  }
+
+  .button:hover {
+    transform: none;
+  }
+
+  /* cards keep the shadow, lose the movement */
+  :is(
+      .course-wrap-main,
+      .course-cards-two,
+      .home-two-blog-cards,
+      .blog-three-cards-one,
+      .team-card,
+      .category-cards,
+      .course-one-category-cards,
+      .career-cards-options,
+      .pricing-one-card,
+      .events-card-two
+    ) img,
+  .course-wrap-main,
+  .course-cards-two,
+  .home-two-blog-cards,
+  .blog-three-cards-one,
+  .team-card,
+  .category-cards,
+  .course-one-category-cards,
+  .career-cards-options,
+  .pricing-one-card {
+    transition: none;
+  }
+
+  .course-wrap-main:hover,
+  .course-cards-two:hover,
+  .home-two-blog-cards:hover,
+  .blog-three-cards-one:hover,
+  .team-card:hover,
+  .category-cards:hover,
+  .course-one-category-cards:hover,
+  .career-cards-options:hover,
+  .pricing-one-card:hover {
+    translate: none;
+  }
+
+  .course-wrap-main:hover img,
+  .course-cards-two:hover img,
+  .home-two-blog-cards:hover img,
+  .blog-three-cards-one:hover img,
+  .events-card-two:hover img {
+    scale: none;
+  }
+}

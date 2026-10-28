@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+Thumbs.db
+
+# One-shot conversion/QA scaffolding stays local: several of these scripts
+# hardcode paths from this machine and point at components that no longer
+# exist. The four verification scripts the README documents are still tracked.
+/tools/*
+!/tools/ssr-smoke.mjs
+!/tools/audit-links.mjs
+!/tools/verify-asset-refs.mjs
+!/tools/check-syntax.mjs
