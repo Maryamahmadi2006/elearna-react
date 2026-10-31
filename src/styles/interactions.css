@@ -941,6 +941,81 @@ body.nav-locked {
 }
 
 /* --------------------------------------------------------------------------
+   17. Contact page on short laptop screens.
+   The published page sizes the hero with height:100vh and anchors the form
+   pop-up 250px above the bottom of a 100vh section, so both positions depend
+   on viewport *height*, which the template only ever tuned against a 900px
+   tall monitor. The pop-up is 452px tall, so its top edge lands at
+   100vh - 702px: -102px on a 1366x600 screen, 66px on a fullscreen 1366x768
+   laptop — either off the page or behind the 91px fixed navbar. The centred
+   hero does the same thing, starting at y=20 on a 1280x560 viewport.
+   Below 860px of height the hero keeps its own flow, the pop-up is anchored
+   from the top and capped, and the round button moves out of its way.
+   -------------------------------------------------------------------------- */
+@media screen and (min-width: 768px) and (max-height: 860px) {
+  .contact-three-main {
+    height: auto;
+    min-height: 100vh;
+    padding: calc(var(--site-header-height, 72px) + 34px) 15px 96px;
+  }
+
+  .contact-big-text {
+    letter-spacing: -5px;
+    font-size: clamp(56px, 10vw, 116px);
+  }
+
+  .contact-big-description {
+    margin-bottom: 34px;
+  }
+
+  .contact-three-information-box {
+    max-width: 430px;
+  }
+
+  .contact-three-information {
+    font-size: 22px;
+    line-height: 36px;
+  }
+
+  .contact-three-border {
+    margin-top: 14px;
+    margin-bottom: 12px;
+  }
+
+  .icon-box {
+    inset: auto 28px 28px auto;
+    width: 48px;
+    height: 48px;
+  }
+
+  .contact-three-form-pop-up {
+    inset: calc(var(--site-header-height, 72px) + 18px) 28px auto auto;
+    max-height: calc(100vh - var(--site-header-height, 72px) - 112px);
+    overflow-y: auto;
+  }
+
+  .contact-three-form-top {
+    padding: 12px 15px;
+  }
+
+  .contact-three-form-inside {
+    padding: 20px 24px 24px;
+  }
+
+  .contact-three-form-pop-up .text-field-two {
+    height: 42px;
+  }
+
+  .contact-three-form-pop-up .margin-bottom-thirty {
+    margin-bottom: 14px;
+  }
+
+  .contact-three-form-pop-up .button-full-width {
+    margin-bottom: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
    13. Reduced motion — keep the visuals, drop the movement.
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
